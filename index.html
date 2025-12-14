@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEPLOYER FUNKY VERCEL</title>
+    <style>
+        /* CSS Ganas: Gaya Neon, Background, dan Layout */
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Consolas', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            /* Efek Neon Border di Body (sesuai screenshot) */
+            border: 5px solid #ff00ff;
+            box-shadow: 0 0 40px #00ffff, 0 0 20px #ff00ff inset;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            /* Menggunakan background transparan/gelap */
+            background: rgba(10, 0, 20, 0.8); 
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        h2 {
+            color: #00ffff; /* Warna teks utama Deploy Website HTML */
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 25px;
+            letter-spacing: 1.5px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .image-container {
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 200px; 
+            /* Memberi sedikit border neon di sekitar gambar */
+            box-shadow: 0 0 10px #ff00ff;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        input[type="text"] {
+            width: 95%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff; /* Border input */
+            color: #ffffff;
+            font-size: 16px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px #00ffff;
+            text-align: center; /* Teks input di tengah */
+        }
+        /* Style untuk tombol Pilih File */
+        input[type="file"] {
+            display: none; /* Sembunyikan input file bawaan */
+        }
+        .file-upload-label {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            color: #ffffff;
+            font-size: 16px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px #00ffff;
+            cursor: pointer;
+            text-align: center;
+            /* Mengatur lebar label agar konten file name di tengah */
+            overflow: hidden; 
+            white-space: nowrap; 
+            text-overflow: ellipsis;
+        }
+        
+        #deployButton {
+            width: 100%;
+            padding: 15px;
+            /* Gradient mirip screenshot */
+            background: linear-gradient(90deg, #1f005c, #00ffff);
+            border: none;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px #00ffff;
+            letter-spacing: 1px;
+        }
+        #deployButton:hover {
+            background: linear-gradient(90deg, #00ffff, #1f005c);
+            box-shadow: 0 0 25px #ff00ff;
+        }
+        #status {
+            margin-top: 20px;
+            color: #00ff00; /* Warna hijau untuk status sukses */
+            text-shadow: 0 0 5px #00ff00;
+            min-height: 30px; /* Minimal tinggi agar tidak bergeser */
+            font-size: 14px;
+        }
+        .vercel-logo {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>DEPLOY WEBSITE HTML</h2>
+    
+    <div class="image-container">
+        <img src="https://i.ibb.co/mFSX7vQL" alt="Anime Deploy Background">
+    </div>
+
+    <form id="deployForm">
+        <input type="text" id="websiteName" placeholder="Nama Website (contoh: testttt)" required>
+        
+        <label for="htmlFile" class="file-upload-label" id="fileLabel">Pilih File HTML</label>
+        <input type="file" id="htmlFile" accept=".html" required>
+        
+        <button type="submit" id="deployButton">DEPLOY SEKARANG</button>
+    </form>
+
+    <div id="status">
+        <span class="vercel-logo">Z</span> Memasukkan *script* Vercel...
+    </div>
+</div>
+
+<script>
+    // --- SCRIPT FRONTEND LOGIC ---
+    const deployForm = document.getElementById('deployForm');
+    const statusElement = document.getElementById('status');
+    const htmlFileInput = document.getElementById('htmlFile');
+    const fileLabel = document.getElementById('fileLabel');
+
+    // Update label saat file dipilih
+    htmlFileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileLabel.textContent = this.files[0].name;
+            fileLabel.style.color = '#00ff00'; // Beri warna hijau jika file dipilih
+        } else {
+            fileLabel.textContent = 'Pilih File HTML';
+            fileLabel.style.color = '#ffffff';
+        }
+    });
+
+    // Handle Form Submission
+    deployForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const websiteName = document.getElementById('websiteName').value;
+        const htmlFile = htmlFileInput.files[0];
+
+        if (!websiteName || !htmlFile) {
+            statusElement.innerHTML = '<span style="color:#ff0000;">ERROR: Nama atau File belum diisi, Babi!</span>';
+            return;
+        }
+
+        // 1. Baca isi file HTML
+        statusElement.innerHTML = '<span class="vercel-logo">Z</span> Membaca konten file...';
+        const fileReader = new FileReader();
+
+        fileReader.onload = async function(event) {
+            const htmlContent = event.target.result;
+            statusElement.innerHTML = '<span class="vercel-logo">Z</span> Mengirim data ke GitHub API via Vercel Jembatan...';
+            
+            // 2. KIRIM KE SERVERLESS FUNCTION VERCEL JEMBATAN
+            // GANTI URL INI DENGAN URL PUBLIC VERCEL SERVERLESS FUNCTION MU!
+            const API_ENDPOINT = 'https://[NAMA-PROJECT-MU].vercel.app/api/deploy'; 
+            
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: websiteName,
+                        html: htmlContent
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusElement.innerHTML = `🔥 **DEPLOY SUKSES!** <br> URL: <a href="${result.url}" target="_blank" style="color:#00ff00; text-decoration: none;">${result.url}</a>`;
+                } else {
+                    statusElement.innerHTML = `<span style="color:#ff0000;">❌ DEPLOY GAGAL!</span> <br> Error: ${result.error || 'Server error, cek log Vercel Jembatan!'}`;
+                }
+
+            } catch (error) {
+                statusElement.innerHTML = `<span style="color:#ff0000;">❌ ERROR KONEKSI!</span> <br> Server Jembatan mati, babi!`;
+            }
+        };
+
+        fileReader.readAsText(htmlFile);
+    });
+</script>
+
+</body>
+</html>
